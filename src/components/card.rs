@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum SUIT {
     SPADES,
     CLUBS,
@@ -8,7 +8,7 @@ pub enum SUIT {
     DIAMONDS
 }
 
-pub enum CARD_VALUE {
+pub enum CardValue {
     ACE = 14,
     KING = 13,
     QUEEN = 12,
@@ -24,6 +24,7 @@ pub enum CARD_VALUE {
     TWO = 2
 }
 
+#[derive(Clone, Copy)]
 pub struct Card {
     pub value: u8,
     pub suit: SUIT,

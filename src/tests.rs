@@ -1,4 +1,4 @@
-use crate::components::{card::{Card, CARD_VALUE, SUIT}, hand::{Hand, HAND_VALUE}};
+use crate::components::{card::{Card, CardValue, SUIT}, hand::{Hand, HandValue}};
 
 #[test]
 fn compare_cards() {
@@ -18,51 +18,114 @@ fn compare_cards() {
 
 #[test]
 fn test_hand_value() {
-    let hand1 = Hand::new([ 
-        Card::new(CARD_VALUE::ACE as u8, SUIT::HEARTS), 
-        Card::new(CARD_VALUE::KING as u8, SUIT::SPADES),
-        Card::new(CARD_VALUE::QUEEN as u8, SUIT::SPADES) 
+    let straight = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::HEARTS), 
+        Card::new(CardValue::KING as u8, SUIT::SPADES),
+        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
     ]);
 
-    let hand2 = Hand::new([ 
-        Card::new(CARD_VALUE::ACE as u8, SUIT::SPADES), 
-        Card::new(CARD_VALUE::KING as u8, SUIT::SPADES),
-        Card::new(CARD_VALUE::QUEEN as u8, SUIT::SPADES) 
+    let royal_flush = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::KING as u8, SUIT::SPADES),
+        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
     ]);
 
-    let hand3 = Hand::new([ 
-        Card::new(CARD_VALUE::ACE as u8, SUIT::SPADES), 
-        Card::new(CARD_VALUE::ACE as u8, SUIT::DIAMONDS),
-        Card::new(CARD_VALUE::ACE as u8, SUIT::HEARTS) 
+    let three_aces = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
+        Card::new(CardValue::ACE as u8, SUIT::HEARTS) 
     ]);
 
-    let hand4 = Hand::new([ 
-        Card::new(CARD_VALUE::ACE as u8, SUIT::SPADES), 
-        Card::new(CARD_VALUE::ACE as u8, SUIT::DIAMONDS),
-        Card::new(CARD_VALUE::FIVE as u8, SUIT::HEARTS) 
+    let pair_ace_five = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
+        Card::new(CardValue::FIVE as u8, SUIT::HEARTS) 
     ]);
 
-    let hand5 = Hand::new([ 
-        Card::new(CARD_VALUE::JACK as u8, SUIT::SPADES), 
-        Card::new(CARD_VALUE::NINE as u8, SUIT::SPADES),
-        Card::new(CARD_VALUE::TEN as u8, SUIT::SPADES) 
+    let straight_flush = Hand::new([ 
+        Card::new(CardValue::JACK as u8, SUIT::SPADES), 
+        Card::new(CardValue::NINE as u8, SUIT::SPADES),
+        Card::new(CardValue::TEN as u8, SUIT::SPADES) 
     ]);
 
-    let hand6 = Hand::new([ 
-        Card::new(CARD_VALUE::ACE as u8, SUIT::SPADES), 
-        Card::new(CARD_VALUE::KING as u8, SUIT::SPADES),
-        Card::new(CARD_VALUE::FIVE as u8, SUIT::SPADES) 
+    let ace_king_flush = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::KING as u8, SUIT::SPADES),
+        Card::new(CardValue::FIVE as u8, SUIT::SPADES) 
     ]);
 
-    assert_eq!(hand1.get_hand_value(), HAND_VALUE::Straight);
+    assert_eq!(straight.get_hand_value(), HandValue::Straight);
     
-    assert_eq!(hand2.get_hand_value(), HAND_VALUE::RoyalFlush);
+    assert_eq!(royal_flush.get_hand_value(), HandValue::RoyalFlush);
     
-    assert_eq!(hand3.get_hand_value(), HAND_VALUE::ThreeOfAKind);
+    assert_eq!(three_aces.get_hand_value(), HandValue::ThreeOfAKind);
 
-    assert_eq!(hand4.get_hand_value(), HAND_VALUE::Pair);
+    assert_eq!(pair_ace_five.get_hand_value(), HandValue::Pair);
 
-    assert_eq!(hand5.get_hand_value(), HAND_VALUE::StraightFlush);
+    assert_eq!(straight_flush.get_hand_value(), HandValue::StraightFlush);
 
-    assert_eq!(hand6.get_hand_value(), HAND_VALUE::Flush);
+    assert_eq!(ace_king_flush.get_hand_value(), HandValue::Flush);
+}
+
+#[test]
+fn hand_comparison() {
+        let straight = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::HEARTS), 
+        Card::new(CardValue::KING as u8, SUIT::SPADES),
+        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
+    ]);
+
+    let royal_flush = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::KING as u8, SUIT::SPADES),
+        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
+    ]);
+
+    let three_aces = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
+        Card::new(CardValue::ACE as u8, SUIT::HEARTS) 
+    ]);
+
+    let pair_ace_five = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
+        Card::new(CardValue::FIVE as u8, SUIT::HEARTS) 
+    ]);
+
+    let straight_flush = Hand::new([ 
+        Card::new(CardValue::JACK as u8, SUIT::SPADES), 
+        Card::new(CardValue::NINE as u8, SUIT::SPADES),
+        Card::new(CardValue::TEN as u8, SUIT::SPADES) 
+    ]);
+
+    let ace_king_flush = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::KING as u8, SUIT::SPADES),
+        Card::new(CardValue::FIVE as u8, SUIT::SPADES) 
+    ]);
+
+    let three_tens = Hand::new([ 
+        Card::new(CardValue::TEN as u8, SUIT::SPADES), 
+        Card::new(CardValue::TEN as u8, SUIT::DIAMONDS),
+        Card::new(CardValue::TEN as u8, SUIT::HEARTS) 
+    ]);
+
+    let pair_ace_four = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
+        Card::new(CardValue::FOUR as u8, SUIT::HEARTS) 
+    ]);
+
+    let ace_king_flush_lower = Hand::new([ 
+        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
+        Card::new(CardValue::KING as u8, SUIT::SPADES),
+        Card::new(CardValue::FOUR as u8, SUIT::SPADES) 
+    ]);
+
+    assert!(straight > pair_ace_five);
+    assert!(royal_flush > straight_flush);
+    assert!(three_aces > three_tens);
+    assert!(pair_ace_five > pair_ace_four);
+    assert!(ace_king_flush > ace_king_flush_lower)
 }

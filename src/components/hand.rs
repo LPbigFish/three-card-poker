@@ -1,15 +1,9 @@
-use std::cmp::{self, Ordering};
+use std::{cell::OnceCell, cmp::Ordering};
 
-use crate::components::{
-    card::Card,
-    support_functions::{
-        get_a_pair, get_highest_card_in_pair, is_flush, is_royal_flush, is_straight,
-        is_straight_flush, is_three_of_a_kind,
-    },
-};
+use crate::components::{card::{Card, CardValue, SUIT}, support_functions::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-pub enum HAND_VALUE {
+pub enum HandValue {
     RoyalFlush = 6,
     StraightFlush = 5,
     ThreeOfAKind = 4,
@@ -19,10 +13,11 @@ pub enum HAND_VALUE {
     HighCard = 0,
 }
 
+#[derive(Clone)]
 pub struct Hand {
     pub holder: [Card; 3],
     pub has_ace: bool,
-    pub value: Option<HAND_VALUE>,
+    pub value: OnceCell<HandValue>,
 }
 
 impl Hand {
@@ -33,28 +28,53 @@ impl Hand {
         Self {
             holder: c,
             has_ace: has_ace,
-            value: None,
+            value: OnceCell::new(),
         }
     }
 
-    pub fn get_hand_value(&self) -> HAND_VALUE {
-        if let Some(s) = &self.value {
-            return *s;
-        }
-
-        match self {
-            x if is_royal_flush(x) => HAND_VALUE::RoyalFlush,
-            x if is_straight_flush(x) => HAND_VALUE::StraightFlush,
-            x if is_three_of_a_kind(x).is_some() => HAND_VALUE::ThreeOfAKind,
-            x if is_straight(x) => HAND_VALUE::Straight,
-            x if is_flush(x) => HAND_VALUE::Flush,
-            x if get_a_pair(x).is_some() => HAND_VALUE::Pair,
-            _ => HAND_VALUE::HighCard,
-        }
+    pub fn get_hand_value(&self) -> HandValue {
+        *self.value.get_or_init(|| match self {
+            x if is_royal_flush(x) => HandValue::RoyalFlush,
+            x if is_straight_flush(x) => HandValue::StraightFlush,
+            x if is_three_of_a_kind(x).is_some() => HandValue::ThreeOfAKind,
+            x if is_straight(x) => HandValue::Straight,
+            x if is_flush(x) => HandValue::Flush,
+            x if get_a_pair(x).is_some() => HandValue::Pair,
+            _ => HandValue::HighCard,
+        })
     }
 
-    pub fn set_hand_value(&mut self) {
-        self.value = Some(self.get_hand_value())
+    pub fn key(&self) -> (HandValue, u8, u8, u8) {
+        let hv = self.get_hand_value();
+
+        use HandValue::*;
+        match hv {
+            RoyalFlush => (hv, 0, 0, 0),
+            ThreeOfAKind => (hv, self.holder[0].value, 0, 0),
+            Pair => {
+                let pair = get_a_pair(self).expect("failed to get a pair somehow");
+                let v2 = get_highest_card_in_pair(self);
+                (hv, pair, v2, 0)
+            }
+            _ => {
+                let [a, b, c] = &self.holder;
+                (hv, c.value, b.value, a.value)
+            }
+        }
+    }
+}
+
+impl Default for Hand {
+    fn default() -> Self {
+        Hand {
+            holder: [
+                Card::new(CardValue::TWO as u8, SUIT::HEARTS),
+                Card::new(CardValue::FOUR as u8, SUIT::SPADES),
+                Card::new(CardValue::ACE as u8, SUIT::SPADES),
+            ],
+            has_ace: true,
+            value: OnceCell::new(),
+        }
     }
 }
 
@@ -66,64 +86,14 @@ impl PartialEq for Hand {
 
 impl Eq for Hand {}
 
+impl Ord for Hand {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.key().cmp(&other.key())
+    }
+}
+
 impl PartialOrd for Hand {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        let hand_value_1 = self.get_hand_value();
-        let hand_value_2 = other.get_hand_value();
-
-        match hand_value_1 {
-            x if x > hand_value_2 => Some(Ordering::Greater),
-            x if x < hand_value_2 => Some(Ordering::Less),
-            x => match x {
-                HAND_VALUE::Flush => {
-                    for i in (0..=2).rev() {
-                        if self.holder[i] > other.holder[i] {
-                            return Some(Ordering::Greater);
-                        }
-                        if self.holder[i] < other.holder[i] {
-                            return Some(Ordering::Less);
-                        }
-                    }
-
-                    return Some(Ordering::Equal);
-                }
-                HAND_VALUE::ThreeOfAKind => {
-                    return Some(Card::cmp(&self.holder[0], &other.holder[0]));
-                }
-                HAND_VALUE::Straight | HAND_VALUE::StraightFlush => {
-                    for i in (0..=2).rev() {
-                        let r = Card::cmp(&self.holder[i], &other.holder[i]);
-                        if r != Ordering::Equal {
-                            return Some(r);
-                        }
-                    }
-                    return Some(Ordering::Equal);
-                }
-                HAND_VALUE::Pair => {
-                    let comb_value_1 = get_a_pair(self);
-                    let comb_value_2 = get_a_pair(other);
-
-                    if comb_value_1.is_some() && comb_value_2.is_some() {
-                        let comb1 = comb_value_1.unwrap();
-                        let comb2 = comb_value_2.unwrap();
-
-                        match comb1 {
-                            x if x > comb2 => Some(Ordering::Greater),
-                            x if x < comb2 => Some(Ordering::Less),
-                            _ => Some(u8::cmp(
-                                &get_highest_card_in_pair(self),
-                                &get_highest_card_in_pair(other),
-                            )),
-                        };
-                    }
-                    None
-                }
-                _ => Some(Ordering::Equal),
-            },
-        };
-
-        //Pairs
-
-        None
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
