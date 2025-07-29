@@ -1,4 +1,9 @@
-use crate::components::{card::{Card, CardValue, SUIT}, hand::{Hand, HandValue}};
+use std::{cmp::Ordering, time};
+
+use rand::rng;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
+use crate::components::{card::{Card, CardValue, SUIT}, deck::Deck, hand::{Hand, HandValue}};
 
 #[test]
 fn compare_cards() {
@@ -128,4 +133,19 @@ fn hand_comparison() {
     assert!(three_aces > three_tens);
     assert!(pair_ace_five > pair_ace_four);
     assert!(ace_king_flush > ace_king_flush_lower)
+}
+
+#[test]
+fn generate_decks() {
+    let mut rng = rng();
+    let beg = time::Instant::now();
+    let mut decks = (0..1_000_000_000).map(|_| Deck::new(&mut rng));
+    let (p, d) = decks.next().unwrap_or_default().deal_both();
+    println!("{:?}", beg.elapsed());
+    println!("{} vs {}", p, d);
+    println!("{} wins!", match p.cmp(&d) {
+        Ordering::Less => "Dealer",
+        Ordering::Equal => "Nobody",
+        Ordering::Greater => "Player",
+    })
 }

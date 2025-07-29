@@ -1,6 +1,9 @@
-use std::{cell::OnceCell, cmp::Ordering};
+use std::{cell::OnceCell, cmp::Ordering, fmt::Display};
 
-use crate::components::{card::{Card, CardValue, SUIT}, support_functions::*};
+use crate::components::{
+    card::{Card, CardValue, SUIT},
+    support_functions::*,
+};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum HandValue {
@@ -13,7 +16,22 @@ pub enum HandValue {
     HighCard = 0,
 }
 
-#[derive(Clone)]
+impl Display for HandValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use HandValue::*;
+        f.write_str(match self {
+            RoyalFlush => "Royal Flush",
+            StraightFlush => "Straight Flush",
+            ThreeOfAKind => "Three of a Kind",
+            Straight => "Straight",
+            Flush => "Flush",
+            Pair => "Pair",
+            HighCard => "High Card",
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Hand {
     pub holder: [Card; 3],
     pub has_ace: bool,
@@ -95,5 +113,17 @@ impl Ord for Hand {
 impl PartialOrd for Hand {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl Display for Hand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "{} {} {}: {}",
+            self.holder[0],
+            self.holder[1],
+            self.holder[2],
+            self.get_hand_value()
+        ))
     }
 }

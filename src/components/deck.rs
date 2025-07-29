@@ -16,8 +16,15 @@ static BASE_DECK: LazyLock<[Card; 52]> = LazyLock::new(|| {
     })
 });
 
+#[derive(Debug, Clone, Copy)]
 pub struct Deck {
     order: [u8; 6],
+}
+
+impl Default for Deck {
+    fn default() -> Self {
+        Self { order: [0, 1, 2, 3, 4, 5] }
+    }
 }
 
 impl Deck {

@@ -1,11 +1,27 @@
-use std::cmp::Ordering;
+use std::{
+    cmp::Ordering,
+    fmt::{Display, Write},
+};
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug)]
 pub enum SUIT {
     SPADES,
     CLUBS,
     HEARTS,
-    DIAMONDS
+    DIAMONDS,
+}
+
+impl Display for SUIT {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let char = match self {
+            SUIT::SPADES => '♠',
+            SUIT::DIAMONDS => '♦',
+            SUIT::HEARTS => '♥',
+            SUIT::CLUBS => '♣',
+        };
+
+        f.write_char(char)
+    }
 }
 
 pub enum CardValue {
@@ -21,19 +37,22 @@ pub enum CardValue {
     FIVE = 5,
     FOUR = 4,
     THREE = 3,
-    TWO = 2
+    TWO = 2,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Card {
     pub value: u8,
     pub suit: SUIT,
 }
 
 impl Card {
-    pub fn new( value: u8, suit: SUIT ) -> Self {
-        Card { suit: suit, value: value }
-    } 
+    pub fn new(value: u8, suit: SUIT) -> Self {
+        Card {
+            suit: suit,
+            value: value,
+        }
+    }
 }
 
 impl PartialEq for Card {
@@ -58,32 +77,20 @@ impl Ord for Card {
 
         Ordering::Equal
     }
-    
-    fn max(self, other: Self) -> Self
-    where
-        Self: Sized,
-    {
-        if other < self { self } else { other }
-    }
-    
-    fn min(self, other: Self) -> Self
-    where
-        Self: Sized,
-    {
-        if other < self { other } else { self }
-    }
-    
-    fn clamp(self, min: Self, max: Self) -> Self
-    where
-        Self: Sized,
-    {
-        assert!(min <= max);
-        if self < min {
-            min
-        } else if self > max {
-            max
-        } else {
-            self
-        }
+}
+
+impl Display for Card {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let binding = self.value.to_string();
+        let value = match self.value {
+            2_u8..=10_u8 => binding.as_str(),
+            11 => "J",
+            12 => "Q",
+            13 => "K",
+            14 => "A",
+            _ => panic!("Wrong value found")
+        };
+
+        f.write_fmt(format_args!("{}{}", value, self.suit))
     }
 }
