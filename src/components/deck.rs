@@ -1,4 +1,4 @@
-use std::sync::LazyLock;
+use std::{fmt::Display, sync::LazyLock};
 
 use rand::{Rng, seq::SliceRandom};
 

@@ -1,7 +1,6 @@
 use std::{cmp::Ordering, time};
 
-use rand::rng;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rand::{rngs::StdRng, SeedableRng};
 
 use crate::components::{card::{Card, CardValue, SUIT}, deck::Deck, hand::{Hand, HandValue}};
 
@@ -137,11 +136,11 @@ fn hand_comparison() {
 
 #[test]
 fn generate_decks() {
-    let mut rng = rng();
+    let mut rng = StdRng::seed_from_u64(65u64);
     let beg = time::Instant::now();
     let mut decks = (0..1_000_000_000).map(|_| Deck::new(&mut rng));
-    let (p, d) = decks.next().unwrap_or_default().deal_both();
     println!("{:?}", beg.elapsed());
+    let (p, d) = decks.next().unwrap_or_default().deal_both();
     println!("{} vs {}", p, d);
     println!("{} wins!", match p.cmp(&d) {
         Ordering::Less => "Dealer",

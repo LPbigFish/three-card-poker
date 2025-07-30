@@ -6,6 +6,6 @@ pub mod support_functions;
 
 pub mod deck;
 
-pub mod game;
+pub mod game_result;
 
 pub mod strategy;
