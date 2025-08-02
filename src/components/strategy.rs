@@ -19,7 +19,7 @@ impl Default for Strategy {
     fn default() -> Self {
         Self {
             ante: 1.0,
-            on_win: Action::None,
+            on_win: Action::Raise2x,
             on_loss: Action::None,
             minimal_playable_hand: Hand::new([
                 Card::new(CardValue::QUEEN as u8, SUIT::SPADES),

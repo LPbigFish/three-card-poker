@@ -1,4 +1,4 @@
-use std::fmt::{Display, Write};
+use std::fmt::Display;
 
 use crate::components::{
     deck::Deck,
@@ -17,7 +17,7 @@ pub struct GameResult {
 }
 
 impl GameResult {
-    fn new(deck: Deck, strat: &Strategy, action: Action) -> Self {
+    pub fn new(deck: Deck, strat: &Strategy, action: Action) -> Self {
         let next_action;
 
         let ante = strat.ante()
@@ -45,7 +45,7 @@ impl GameResult {
 
                 next_action = strat.on_win();
 
-                mult * ante + ante * 2.0
+                (mult + 3.0) * ante
             } else {
                 next_action = strat.on_loss();
                 -2.0 * ante
@@ -65,12 +65,20 @@ impl GameResult {
             next_action: next_action,
         }
     }
+
+    pub fn player_won(&self) -> bool {
+        self.player_won
+    }
+
+    pub fn next_action(&self) -> Action {
+        self.next_action
+    }
 }
 
 impl Display for GameResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let (p, d) = self.deck.deal_both();
 
-        todo!()
+        f.write_fmt(format_args!("Ante: {:.2}\n{} vs {}\nPlayed: {}\nDealer qualified: {}\nOutcome: {:.2}\nPlayer won: {}", self.ante_bet, p, d, self.played, self.dealer_qualified, self.outcome, self.player_won))
     }
 }

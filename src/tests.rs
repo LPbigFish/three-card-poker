@@ -2,7 +2,7 @@ use std::{cmp::Ordering, time};
 
 use rand::{rngs::StdRng, SeedableRng};
 
-use crate::components::{card::{Card, CardValue, SUIT}, deck::Deck, hand::{Hand, HandValue}};
+use crate::components::{card::{Card, CardValue, SUIT}, deck::Deck, game_result::GameResult, hand::{Hand, HandValue}, strategy::{Action, Strategy}};
 
 #[test]
 fn compare_cards() {
@@ -147,4 +147,17 @@ fn generate_decks() {
         Ordering::Equal => "Nobody",
         Ordering::Greater => "Player",
     })
+}
+
+#[test]
+fn test_strategy() {
+    let strat = Strategy::default();
+    let mut rng = StdRng::seed_from_u64(65u64);
+    let mut decks = (0..1_000_000).map(|_| Deck::new(&mut rng));
+    let game = GameResult::new(decks.next().unwrap_or_default(), &strat, Action::None);
+    let game2 = GameResult::new(decks.next().unwrap_or_default(), &strat, game.next_action());
+    println!("{}\n", game);
+    assert!(game.player_won());
+    println!("{}", game2);
+    assert!(game2.player_won())
 }
