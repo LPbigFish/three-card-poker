@@ -24,6 +24,8 @@ impl Display for SUIT {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
 pub enum CardValue {
     ACE = 14,
     KING = 13,
@@ -40,6 +42,30 @@ pub enum CardValue {
     TWO = 2,
 }
 
+impl CardValue {
+    pub fn array() -> [CardValue; 13] {
+        [
+            CardValue::TWO,
+            CardValue::THREE,
+            CardValue::FOUR,
+            CardValue::FIVE,
+            CardValue::SIX,
+            CardValue::SEVEN,
+            CardValue::EIGHT,
+            CardValue::NINE,
+            CardValue::TEN,
+            CardValue::JACK,
+            CardValue::QUEEN,
+            CardValue::KING,
+            CardValue::ACE,
+        ]
+    }
+
+    pub fn as_u8(self) -> u8 {
+        self as u8
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Card {
     pub value: u8,
@@ -47,10 +73,10 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn new(value: u8, suit: SUIT) -> Self {
+    pub fn new(value: CardValue, suit: SUIT) -> Self {
         Card {
             suit: suit,
-            value: value,
+            value: value.as_u8(),
         }
     }
 }
@@ -88,7 +114,7 @@ impl Display for Card {
             12 => "Q",
             13 => "K",
             14 => "A",
-            _ => panic!("Wrong value found")
+            _ => panic!("Wrong value found"),
         };
 
         f.write_fmt(format_args!("{}{}", value, self.suit))

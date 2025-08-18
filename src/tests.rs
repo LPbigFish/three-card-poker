@@ -1,19 +1,28 @@
 use std::{cmp::Ordering, time};
 
-use rand::{rngs::StdRng, SeedableRng};
+use itertools::Itertools;
+use rand::{SeedableRng, rngs::StdRng};
 
-use crate::components::{card::{Card, CardValue, SUIT}, deck::Deck, game_result::GameResult, hand::{Hand, HandValue}, strategy::{Action, Strategy}};
+use crate::components::{
+    card::{Card, CardValue, SUIT},
+    deck::Deck,
+    hand::{Hand, HandValue},
+    strategy::{Action, Strategy},
+};
+
+use CardValue::*;
+use SUIT::*;
 
 #[test]
 fn compare_cards() {
     // Test card 1
-    let c1 = Card::new(2, SUIT::HEARTS);
+    let c1 = Card::new(TWO, HEARTS);
     // Test card 2
-    let c2 = Card::new(14, SUIT::DIAMONDS);
+    let c2 = Card::new(ACE, DIAMONDS);
     // Test card 3
-    let c3 = Card::new(5, SUIT::CLUBS);
+    let c3 = Card::new(FIVE, CLUBS);
     // Test card 4
-    let c4 = Card::new(5, SUIT::SPADES);
+    let c4 = Card::new(FIVE, SPADES);
 
     assert_eq!(c1 < c2, true);
     assert_eq!(c3 == c4, true);
@@ -22,46 +31,46 @@ fn compare_cards() {
 
 #[test]
 fn test_hand_value() {
-    let straight = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::HEARTS), 
-        Card::new(CardValue::KING as u8, SUIT::SPADES),
-        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
+    let straight = Hand::new([
+        Card::new(ACE, HEARTS),
+        Card::new(KING, SPADES),
+        Card::new(QUEEN, SPADES),
     ]);
 
-    let royal_flush = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::KING as u8, SUIT::SPADES),
-        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
+    let royal_flush = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(KING, SPADES),
+        Card::new(QUEEN, SPADES),
     ]);
 
-    let three_aces = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
-        Card::new(CardValue::ACE as u8, SUIT::HEARTS) 
+    let three_aces = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(ACE, DIAMONDS),
+        Card::new(ACE, HEARTS),
     ]);
 
-    let pair_ace_five = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
-        Card::new(CardValue::FIVE as u8, SUIT::HEARTS) 
+    let pair_ace_five = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(ACE, DIAMONDS),
+        Card::new(FIVE, HEARTS),
     ]);
 
-    let straight_flush = Hand::new([ 
-        Card::new(CardValue::JACK as u8, SUIT::SPADES), 
-        Card::new(CardValue::NINE as u8, SUIT::SPADES),
-        Card::new(CardValue::TEN as u8, SUIT::SPADES) 
+    let straight_flush = Hand::new([
+        Card::new(JACK, SPADES),
+        Card::new(NINE, SPADES),
+        Card::new(TEN, SPADES),
     ]);
 
-    let ace_king_flush = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::KING as u8, SUIT::SPADES),
-        Card::new(CardValue::FIVE as u8, SUIT::SPADES) 
+    let ace_king_flush = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(KING, SPADES),
+        Card::new(FIVE, SPADES),
     ]);
 
     assert_eq!(straight.get_hand_value(), HandValue::Straight);
-    
+
     assert_eq!(royal_flush.get_hand_value(), HandValue::RoyalFlush);
-    
+
     assert_eq!(three_aces.get_hand_value(), HandValue::ThreeOfAKind);
 
     assert_eq!(pair_ace_five.get_hand_value(), HandValue::Pair);
@@ -73,58 +82,58 @@ fn test_hand_value() {
 
 #[test]
 fn hand_comparison() {
-        let straight = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::HEARTS), 
-        Card::new(CardValue::KING as u8, SUIT::SPADES),
-        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
+    let straight = Hand::new([
+        Card::new(ACE, HEARTS),
+        Card::new(KING, SPADES),
+        Card::new(QUEEN, SPADES),
     ]);
 
-    let royal_flush = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::KING as u8, SUIT::SPADES),
-        Card::new(CardValue::QUEEN as u8, SUIT::SPADES) 
+    let royal_flush = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(KING, SPADES),
+        Card::new(QUEEN, SPADES),
     ]);
 
-    let three_aces = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
-        Card::new(CardValue::ACE as u8, SUIT::HEARTS) 
+    let three_aces = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(ACE, DIAMONDS),
+        Card::new(ACE, HEARTS),
     ]);
 
-    let pair_ace_five = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
-        Card::new(CardValue::FIVE as u8, SUIT::HEARTS) 
+    let pair_ace_five = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(ACE, DIAMONDS),
+        Card::new(FIVE, HEARTS),
     ]);
 
-    let straight_flush = Hand::new([ 
-        Card::new(CardValue::JACK as u8, SUIT::SPADES), 
-        Card::new(CardValue::NINE as u8, SUIT::SPADES),
-        Card::new(CardValue::TEN as u8, SUIT::SPADES) 
+    let straight_flush = Hand::new([
+        Card::new(JACK, SPADES),
+        Card::new(NINE, SPADES),
+        Card::new(TEN, SPADES),
     ]);
 
-    let ace_king_flush = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::KING as u8, SUIT::SPADES),
-        Card::new(CardValue::FIVE as u8, SUIT::SPADES) 
+    let ace_king_flush = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(KING, SPADES),
+        Card::new(FIVE, SPADES),
     ]);
 
-    let three_tens = Hand::new([ 
-        Card::new(CardValue::TEN as u8, SUIT::SPADES), 
-        Card::new(CardValue::TEN as u8, SUIT::DIAMONDS),
-        Card::new(CardValue::TEN as u8, SUIT::HEARTS) 
+    let three_tens = Hand::new([
+        Card::new(TEN, SPADES),
+        Card::new(TEN, DIAMONDS),
+        Card::new(TEN, HEARTS),
     ]);
 
-    let pair_ace_four = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::ACE as u8, SUIT::DIAMONDS),
-        Card::new(CardValue::FOUR as u8, SUIT::HEARTS) 
+    let pair_ace_four = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(ACE, DIAMONDS),
+        Card::new(FOUR, HEARTS),
     ]);
 
-    let ace_king_flush_lower = Hand::new([ 
-        Card::new(CardValue::ACE as u8, SUIT::SPADES), 
-        Card::new(CardValue::KING as u8, SUIT::SPADES),
-        Card::new(CardValue::FOUR as u8, SUIT::SPADES) 
+    let ace_king_flush_lower = Hand::new([
+        Card::new(ACE, SPADES),
+        Card::new(KING, SPADES),
+        Card::new(FOUR, SPADES),
     ]);
 
     assert!(straight > pair_ace_five);
@@ -142,11 +151,14 @@ fn generate_decks() {
     println!("{:?}", beg.elapsed());
     let (p, d) = decks.next().unwrap_or_default().deal_both();
     println!("{} vs {}", p, d);
-    println!("{} wins!", match p.cmp(&d) {
-        Ordering::Less => "Dealer",
-        Ordering::Equal => "Nobody",
-        Ordering::Greater => "Player",
-    })
+    println!(
+        "{} wins!",
+        match p.cmp(&d) {
+            Ordering::Less => "Dealer",
+            Ordering::Equal => "Nobody",
+            Ordering::Greater => "Player",
+        }
+    )
 }
 
 #[test]
@@ -154,10 +166,43 @@ fn test_strategy() {
     let strat = Strategy::default();
     let mut rng = StdRng::seed_from_u64(65u64);
     let mut decks = (0..1_000_000).map(|_| Deck::new(&mut rng));
-    let game = GameResult::new(decks.next().unwrap_or_default(), &strat, Action::None);
-    let game2 = GameResult::new(decks.next().unwrap_or_default(), &strat, game.next_action());
-    println!("{}\n", game);
-    assert!(game.player_won());
-    println!("{}", game2);
-    assert!(game2.player_won())
+
+    let game_result1 = decks.next().unwrap_or_default();
+    println!(
+        "Game result: {}\n",
+        game_result1.get_game_result(Some(&strat), Some(Action::None))
+    );
+    let game_result2 = decks.next().unwrap_or_default();
+    println!(
+        "Next game result: {}",
+        game_result2.get_game_result(
+            Some(&strat),
+            Some(game_result1.get_game_result(None, None).next_action())
+        )
+    );
+}
+
+#[test]
+fn test_strategy_with_balance() {
+    let strat = Strategy::default();
+    let mut rng = StdRng::seed_from_u64(65u64);
+    let decks = (0..1_000_000).map(|_| Deck::new(&mut rng));
+    let res = decks.tuple_windows().map(|(a, b)| {
+        let game_result1 = a.get_game_result(Some(&strat), Some(Action::None));
+        let game_result2 = b.get_game_result(Some(&strat), Some(game_result1.next_action()));
+
+        (
+            (game_result1.ante_bet() * if game_result1.played() { 2f32 } else { 1f32 }) + (game_result2.ante_bet() * if game_result2.played() { 2f32 } else { 1f32 }),
+            game_result1.outcome() + game_result2.outcome(),
+        )
+    });
+
+    let (total_ante, total_outcome) = res
+        .take(10_000)
+        .fold((0f32, 0f32), |(cante, cout), (x, y)| (cante + x, cout + y));
+
+    println!(
+        "Total ante: {}, Total outcome: {}",
+        total_ante, total_outcome
+    );
 }

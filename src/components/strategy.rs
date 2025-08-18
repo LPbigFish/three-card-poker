@@ -1,6 +1,6 @@
 use crate::components::{card::{Card, CardValue, SUIT}, hand::Hand};
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum Action {
     Raise2x,
     Lower2x,
@@ -22,9 +22,9 @@ impl Default for Strategy {
             on_win: Action::Raise2x,
             on_loss: Action::None,
             minimal_playable_hand: Hand::new([
-                Card::new(CardValue::QUEEN as u8, SUIT::SPADES),
-                Card::new(CardValue::SEVEN as u8, SUIT::CLUBS),
-                Card::new(CardValue::FIVE as u8, SUIT::DIAMONDS),
+                Card::new(CardValue::QUEEN, SUIT::SPADES),
+                Card::new(CardValue::SEVEN, SUIT::CLUBS),
+                Card::new(CardValue::FIVE, SUIT::DIAMONDS),
             ]),
         }
     }

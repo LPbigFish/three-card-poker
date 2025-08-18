@@ -86,9 +86,9 @@ impl Default for Hand {
     fn default() -> Self {
         Hand {
             holder: [
-                Card::new(CardValue::TWO as u8, SUIT::HEARTS),
-                Card::new(CardValue::FOUR as u8, SUIT::SPADES),
-                Card::new(CardValue::ACE as u8, SUIT::SPADES),
+                Card::new(CardValue::TWO, SUIT::HEARTS),
+                Card::new(CardValue::FOUR, SUIT::SPADES),
+                Card::new(CardValue::ACE, SUIT::SPADES),
             ],
             has_ace: true,
             value: OnceCell::new(),
